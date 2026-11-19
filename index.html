@@ -6,489 +6,349 @@
 <title>CarLog Raksakon | ระบบบันทึกการใช้รถยนต์</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = { theme: { extend: { colors: { medical: '#2A3C76', pinkmedical: '#FE696E' } } } };
-</script>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
 <style>
-html, body, button, input, select, textarea, table { font-family: "Sarabun", "Noto Sans Thai", Tahoma, sans-serif; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; touch-action: manipulation; }
-body { background: #f1f5f9; min-width: 320px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
-#loginPage, #mainPage { min-height: 100vh; min-height: 100dvh; }
-.glass { background: rgba(255,255,255,.92); backdrop-filter: blur(12px); }
-.tab-button.active { background: #2563eb; color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,.25); }
-.hidden-section { display: none !important; }
-button { min-height: 44px; touch-action: manipulation; }
-input, select, textarea { outline: none; min-height: 46px; border-radius: 12px; font-size: 16px; }
-textarea { min-height: 88px; }
-input:focus, select:focus, textarea:focus { border-color: #2563eb !important; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
-input[type=date] { -webkit-appearance: none; appearance: none; display: block; text-align: left; }
-.loading { pointer-events: none; opacity: .65; }
-.required::after { content: " *"; color: #dc2626; }
-th { white-space: nowrap; }
-.table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px #e2e8f0; }
-.table-wrapper table { min-width: 900px; }
-.report-cards { display: none; }
-#userNameDisplay, #userIdDisplay { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-@media (max-width: 767px) {
-  body { font-size: 14px; padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
-  body.kb-open { padding-bottom: 0; }
-  input, select, textarea { font-size: 16px !important; }
-  #mainPage header { padding-top: env(safe-area-inset-top); }
-  #mainPage main { padding: 12px; }
-  #loginPage { align-items: flex-start; padding-top: 9vh; }
-  button[type=submit] { min-height: 50px; font-size: 16px; }
-  .swal2-popup { width: calc(100% - 24px) !important; font-size: 14px !important; }
-
-  #bottomNav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; margin: 0; gap: 6px; overflow: visible;
-    padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.97);
-    border-top: 1px solid #e2e8f0; box-shadow: 0 -4px 18px rgba(15,23,42,.08); }
-  #bottomNav .tab-button { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: 2px; min-height: 54px; padding: 6px 4px !important; font-size: 12px !important; }
-  #bottomNav .tab-button i { margin: 0 !important; font-size: 22px; }
-  body.kb-open #bottomNav { display: none; }
-
-  .table-wrapper { box-shadow: none; background: transparent; overflow: visible; }
-  .table-wrapper table { display: none; }
-  .report-cards { display: block; }
+/* ===== THEME: กรมท่า #2A3C76 / ส้มแดง #FE696E / ฟ้าเทา #89A0CF / เทาอ่อน #F1F2F6 ===== */
+:root {
+  --p:#2A3C76; --p2:#4d62ad; --a:#FE696E; --a2:#ff8f8a; --soft:#89A0CF;
+  --bg:#F1F2F6; --dark:#223063; --ink:#2A3C76; --mute:#7f8bb0; --line:#dfe3ee; --lock:#eef0f6;
 }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; touch-action: manipulation; }
+body, button, input, select, textarea { font-family: "Sarabun", "Noto Sans Thai", Tahoma, sans-serif; }
+html { background: #fff; }
+body { background: #fff linear-gradient(var(--dark), var(--dark)) no-repeat top / 100% 320px; color: var(--ink); min-width: 320px; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; border: 0; background: none; color: inherit; touch-action: manipulation; }
+.hidden-section { display: none !important; }
+.wrap { max-width: 560px; margin: 0 auto; padding: 0 16px; }
+.loading { pointer-events: none; opacity: .7; }
+.animate-spin { display: inline-block; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ===== THEME: Navy #2A3C76 / Coral #FE696E / Periwinkle #89A0CF / Mist #F1F2F6 ===== */
-:root { --navy:#2A3C76; --coral:#FE696E; --peri:#89A0CF; --mist:#F1F2F6; --navy-dark:#212f5e; --coral-dark:#ef565b; }
-body { background: var(--mist); color: var(--navy); }
-body .text-slate-800, body .text-slate-700 { color: var(--navy); }
+/* ---------- ส่วนหัวสีเข้ม + แผ่นขาวซ้อน ---------- */
+.hero { background: var(--dark); color: #fff; padding: calc(14px + env(safe-area-inset-top)) 0 40px; }
+.bar { display: flex; align-items: center; gap: 10px; }
+.bar img { width: 38px; height: 38px; border-radius: 12px; object-fit: cover; flex: none; background: var(--a); }
+.bar .who { min-width: 0; flex: 1; }
+.bar .who b { display: block; font-size: 17px; line-height: 1.25; }
+.bar .who small { display: block; font-size: 12px; opacity: .75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.round-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.14); color: #fff; display: grid; place-items: center; flex: none; font-size: 19px; }
+.tabs { display: flex; gap: 8px; margin-top: 16px; }
+.tab-button { flex: 1; min-height: 56px; border-radius: 16px; background: rgba(255,255,255,.12); color: rgba(255,255,255,.85);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; font-weight: 600; transition: background .2s, color .2s; }
+.tab-button i { font-size: 22px; }
+.tab-button.active { background: #fff; color: var(--p); }
+.tab-button.active.fuel { color: var(--a); }
 
-/* header: แถบสีกรมท่า มุมล่างโค้ง */
-.app-header { background: var(--navy); border-radius: 0 0 24px 24px; box-shadow: 0 8px 24px rgba(42,60,118,.18); }
-.app-header h1 { color: #fff; }
-.app-header p { color: rgba(255,255,255,.7); }
-.app-header #userNameDisplay { color: #fff; }
-.app-header button { background: rgba(255,255,255,.15); color: #fff; }
-.app-header button:hover { background: rgba(255,255,255,.28); color: #fff; }
+.sheet { background: #fff; border-radius: 28px 28px 0 0; margin-top: -26px; position: relative;
+  min-height: calc(100vh - 150px); min-height: calc(100dvh - 150px); padding: 10px 0 calc(32px + env(safe-area-inset-bottom)); }
+.handle { width: 40px; height: 4px; border-radius: 4px; background: #d6dae6; margin: 0 auto 8px; }
+.sec-title { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.sec-title h2 { font-size: 19px; }
+.sec-title p { font-size: 13px; color: var(--mute); }
 
-/* หน้า Login: ครึ่งบนสีกรมท่า การ์ดขาวซ้อนทับ */
-#loginPage { background: linear-gradient(180deg, var(--navy) 0 42%, var(--mist) 42% 100%); }
+/* ---------- ช่องกรอกแบบป้ายลอยบนเส้นขอบ ---------- */
+.f { position: relative; margin-top: 20px; min-width: 0; }
+.f > label { position: absolute; top: -8px; left: 11px; z-index: 1; background: #fff; padding: 0 5px;
+  font-size: 12px; font-weight: 600; color: var(--mute); white-space: nowrap; pointer-events: none; }
+.f.req > label::after { content: " *"; color: var(--a); }
+.in { width: 100%; height: 50px; border: 1.5px solid var(--line); border-radius: 14px; padding: 0 14px;
+  font-size: 16px; color: var(--ink); background: #fff; outline: none; -webkit-appearance: none; appearance: none; }
+.in::placeholder { color: #a4adc8; }
+.in[type=number] { -moz-appearance: textfield; }
+.in::-webkit-inner-spin-button, .in::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.in:focus { border-color: var(--soft); box-shadow: 0 0 0 3px rgba(137,160,207,.3); }
+textarea.in { height: 76px; padding: 13px 14px; resize: vertical; }
+select.in { padding-right: 34px; text-overflow: ellipsis;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f8bb0' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 11px center / 16px; }
+.in[readonly] { background: var(--lock); border-color: transparent; font-weight: 700; pointer-events: none; }
+.f.hl .in { color: var(--p); }
+.f.hl.co .in { color: var(--a); }
+.f-ic { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--mute); font-size: 16px; pointer-events: none; }
+.row { display: grid; gap: 8px; }
+.row > * { min-width: 0; }
+.row.c5 { grid-template-columns: 1.1fr 1fr; }
+.row.c6 { grid-template-columns: 1.25fr 1fr; }
+.row.c2 { grid-template-columns: 1fr 1fr; }
+.row.c3 { grid-template-columns: 1fr 1fr 1fr; }
+.row.c3 .in { padding: 0 10px; }
 
-/* การ์ด */
-body .border-slate-200.rounded-2xl { border-color: transparent; border-radius: 20px; box-shadow: 0 8px 28px rgba(42,60,118,.08); }
-.glass { border-radius: 24px !important; box-shadow: 0 16px 40px rgba(42,60,118,.18) !important; }
+.photo { margin-top: 20px; min-height: 50px; border: 1.5px dashed var(--soft); border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  gap: 8px; color: var(--p); font-size: 14px; font-weight: 600; padding: 8px 14px; text-align: center; cursor: pointer; }
+.photo i { font-size: 20px; }
+.photo.has { border-style: solid; background: rgba(137,160,207,.12); }
+.photo input { display: none; }
+.hint { font-size: 11px; color: var(--mute); margin-top: 4px; text-align: center; }
 
-/* ช่องกรอก: พื้นเทาอ่อนแบบในแอป */
-body input, body select, body textarea { background-color: var(--mist); border-color: transparent; color: var(--navy); }
-body input[readonly], body input.bg-slate-100 { background-color: #E3E7F1; }
-body input::placeholder, body textarea::placeholder { color: #9aa6c6; }
-body input:focus, body select:focus, body textarea:focus { border-color: var(--peri) !important; box-shadow: 0 0 0 3px rgba(137,160,207,.35); background-color: #fff; }
-body .required::after { color: var(--coral); }
+.btn { width: 100%; min-height: 52px; margin-top: 22px; border-radius: 999px; color: #fff; font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: linear-gradient(90deg, var(--p), var(--p2)); box-shadow: 0 10px 20px -10px var(--p); }
+.btn.coral { background: linear-gradient(90deg, var(--a), var(--a2)); box-shadow: 0 10px 20px -10px var(--a); }
+.btn:active { transform: scale(.98); }
 
-/* ปุ่ม */
-body button[type=submit] { border-radius: 999px; box-shadow: 0 6px 16px rgba(42,60,118,.25); }
-body .bg-blue-600 { background-color: var(--navy); }
-body .hover\:bg-blue-700:hover { background-color: var(--navy-dark); }
-body .bg-pink-600 { background-color: var(--coral); }
-body .hover\:bg-pink-700:hover { background-color: var(--coral-dark); }
-body button.bg-pink-600[type=submit] { box-shadow: 0 6px 16px rgba(254,105,110,.35); }
-body .bg-blue-100 { background-color: rgba(42,60,118,.08); }
-body .hover\:bg-blue-200:hover { background-color: rgba(42,60,118,.16); }
+/* ---------- หน้าเข้าสู่ระบบ ---------- */
+.login-hero { background: var(--dark); color: #fff; text-align: center; padding: calc(48px + env(safe-area-inset-top)) 16px 64px; }
+.login-hero img { width: 84px; height: 84px; border-radius: 24px; object-fit: cover; border: 3px solid rgba(255,255,255,.9); background: var(--a); }
+.login-hero h1 { font-size: 24px; margin-top: 14px; }
+.login-hero p { font-size: 14px; opacity: .8; margin-top: 2px; }
+.login-sheet { min-height: calc(100vh - 230px); min-height: calc(100dvh - 230px); }
+.login-sheet h2 { font-size: 22px; margin-top: 10px; }
+.login-sheet .lead { font-size: 14px; color: var(--mute); margin-top: 2px; }
+.foot { text-align: center; font-size: 12px; color: var(--mute); margin-top: 40px; }
 
-/* แท็บ */
-body .tab-button { border-radius: 999px; }
-body .tab-button.active { background: var(--navy); color: #fff; box-shadow: 0 6px 16px rgba(42,60,118,.28); }
-body .tab-button:not(.active) { background: #fff; color: #6F82B5; }
+/* ---------- รายงาน ---------- */
+.seg { display: flex; background: var(--bg); border-radius: 999px; padding: 4px; margin-top: 8px; }
+.seg button { flex: 1; min-height: 40px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--mute); }
+.seg button.on { background: #fff; color: var(--p); box-shadow: 0 2px 6px rgba(20,30,70,.1); }
+.seg button.on.fuel { color: var(--a); }
+.chips { display: flex; gap: 6px; margin-top: 12px; align-items: center; }
+.chip { height: 38px; border: 0; border-radius: 999px; background-color: var(--bg); color: var(--p); font-size: 14px; font-weight: 600;
+  padding: 0 28px 0 13px; min-width: 0; -webkit-appearance: none; appearance: none; outline: none; text-overflow: ellipsis;
+  background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f8bb0' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 9px center / 13px; }
+.chip.car { flex: 1.4; } .chip.mon { flex: 1.2; } .chip.yr { flex: .9; }
+.chips .round-btn { background: var(--bg); color: var(--p); width: 38px; height: 38px; font-size: 17px; }
 
-/* สีไอคอนและตัวเลข */
-body .text-blue-600, body .text-blue-700, body .text-blue-800 { color: var(--navy); }
-body .text-pink-600, body .text-pink-700, body .text-pink-800 { color: var(--coral); }
-body .text-emerald-600, body .text-emerald-700, body .text-emerald-800 { color: #5C78B8; }
-body .text-amber-600, body .text-amber-800 { color: var(--coral); }
-body .bg-blue-50 { background-color: rgba(42,60,118,.07); }
-body .bg-emerald-50 { background-color: rgba(137,160,207,.20); }
-body .bg-pink-50, body .bg-amber-50 { background-color: rgba(254,105,110,.10); }
-body .border-blue-100, body .border-emerald-100, body .border-pink-100, body .border-amber-100 { border-color: transparent; }
+.card { background: var(--bg); border-radius: 18px; padding: 14px; margin-top: 14px; }
+.card-top { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--mute); font-weight: 600; }
+.bars { display: flex; align-items: flex-end; gap: 3px; height: 110px; margin-top: 12px; }
+.bars i { flex: 1; min-width: 2px; border-radius: 4px 4px 2px 2px; background: var(--soft); opacity: .5; }
+.bars i.on { background: var(--p); opacity: 1; }
+.axis { display: flex; justify-content: space-between; font-size: 11px; color: var(--mute); margin-top: 6px; }
+.line { position: relative; height: 130px; margin-top: 12px; }
+.line svg { width: 100%; height: 100%; display: block; }
+.dot { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 3px solid var(--a); transform: translate(-50%, -50%); }
+.tip { position: absolute; transform: translate(-50%, -150%); background: #fff; border-radius: 8px; padding: 3px 8px; white-space: nowrap;
+  font-size: 12px; font-weight: 700; color: var(--a); box-shadow: 0 4px 10px rgba(20,30,70,.15); }
+.empty { text-align: center; color: var(--mute); font-size: 13px; padding: 30px 0; }
 
-/* กล่องด้านขวา (จอใหญ่) */
-.panel-navy { background: linear-gradient(135deg, #2A3C76, #3d52a0); }
-.panel-coral { background: linear-gradient(135deg, #FE696E, #f0525a); }
-.panel-coral .text-pink-100 { color: #fff; opacity: .92; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.stats div { background: var(--bg); border-radius: 16px; padding: 12px 14px; min-width: 0; }
+.stats small { display: block; font-size: 12px; color: var(--mute); }
+.stats b { display: block; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stats .co { color: var(--a); }
 
-/* ตารางและการ์ดรายงาน */
-body thead.bg-slate-100 { background: var(--mist); }
-body thead th { color: var(--navy); }
-body .report-cards > div { border-color: transparent; border-radius: 16px; box-shadow: 0 4px 16px rgba(42,60,118,.08); }
+.list { margin-top: 8px; }
+.li { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid #eef0f6; }
+.li:last-child { border-bottom: 0; }
+.li .ic { width: 40px; height: 40px; border-radius: 13px; background: var(--bg); color: var(--p); display: grid; place-items: center; flex: none; font-size: 20px; }
+.li .ic.co { color: var(--a); }
+.li .tx { min-width: 0; flex: 1; }
+.li b { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.li small { display: block; font-size: 12px; color: var(--mute); }
+.li small a { color: var(--p); font-weight: 600; text-decoration: none; }
+.li .v { flex: none; text-align: right; font-weight: 700; font-size: 16px; color: var(--p); white-space: nowrap; }
+.li .v.co { color: var(--a); }
+.li .v small { display: inline; font-weight: 500; font-size: 11px; }
 
 /* SweetAlert */
-body .swal2-styled.swal2-confirm { background-color: var(--navy); border-radius: 999px; }
-body .swal2-styled.swal2-cancel { border-radius: 999px; }
-body .swal2-icon.swal2-question { border-color: var(--peri); color: var(--peri); }
-
-@media (max-width: 767px) {
-  #loginPage { background: linear-gradient(180deg, var(--navy) 0 36%, var(--mist) 36% 100%); }
-  #bottomNav { background: #fff; border-radius: 20px 20px 0 0; box-shadow: 0 -6px 24px rgba(42,60,118,.12); border-top: none; }
-  #bottomNav .tab-button { background: transparent; color: #8FA2CE; box-shadow: none; }
-  #bottomNav .tab-button.active { background: rgba(42,60,118,.08); color: var(--navy); box-shadow: none; }
-}
+.swal2-popup { border-radius: 22px !important; font-family: inherit !important; }
+.swal2-styled.swal2-confirm { background-color: var(--p) !important; border-radius: 999px !important; }
+.swal2-styled.swal2-cancel { border-radius: 999px !important; }
+@media (max-width: 600px) { .swal2-popup { width: calc(100% - 24px) !important; font-size: 14px !important; } }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<section id="loginPage" class="flex items-center justify-center p-4 bg-gradient-to-br from-blue-100 via-white to-pink-100">
-  <div class="w-full max-w-md glass rounded-3xl shadow-2xl p-6 sm:p-8">
-    <div class="text-center mb-8">
-      <img src="https://i.postimg.cc/pXHW7T4D/Squre-profile-pink-bg.jpg" alt="โลโก้ CarLog Raksakon"
-        width="96" height="96" referrerpolicy="no-referrer"
-        class="mx-auto w-24 h-24 rounded-3xl object-cover shadow-lg">
-      <h1 class="text-2xl font-bold text-slate-800 mt-5">CarLog MD3</h1>
-      <p class="text-slate-500 mt-2">ระบบบันทึกการใช้รถยนต์</p>
-      <p class="text-sm text-blue-600 font-semibold mt-1">โรงพยาบาลรักษ์สกล</p>
+<!-- ========== LOGIN ========== -->
+<section id="loginPage">
+  <div class="login-hero">
+    <img src="https://i.postimg.cc/pXHW7T4D/Squre-profile-pink-bg.jpg" alt="" width="84" height="84" referrerpolicy="no-referrer" onerror="this.removeAttribute('src')">
+    <h1>CarLog Raksakon</h1>
+    <p>โรงพยาบาลรักษ์สกล</p>
+  </div>
+  <div class="sheet login-sheet">
+    <div class="wrap">
+      <div class="handle"></div>
+      <h2>เข้าสู่ระบบ</h2>
+      <p class="lead">กรอกรหัสพนักงานเพื่อเริ่มบันทึกการใช้รถ</p>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="f req" style="margin-top:28px">
+          <label for="loginEmpId">รหัสพนักงาน</label>
+          <input id="loginEmpId" class="in" type="text" placeholder="เช่น 9101" autocomplete="off" enterkeyhint="go" required>
+        </div>
+        <button id="loginButton" type="submit" class="btn">เข้าสู่ระบบ</button>
+      </form>
+      <p class="foot">ระบบบันทึกการใช้รถยนต์ · v2.0</p>
     </div>
-
-    <form id="loginForm" onsubmit="handleLogin(event)">
-      <label class="block text-sm font-semibold text-slate-700 mb-2">รหัสพนักงาน</label>
-      <div class="relative mb-5">
-        <i class="ph ph-identification-card absolute left-4 top-3.5 text-xl text-slate-400"></i>
-        <input id="loginEmpId" type="text" placeholder="เช่น 9101" autocomplete="off" enterkeyhint="go"
-          class="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-300" required>
-      </div>
-      <button id="loginButton" type="submit" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition">
-        <i class="ph ph-sign-in mr-2"></i>เข้าสู่ระบบ
-      </button>
-    </form>
-
-    <div class="mt-6 text-center text-xs text-slate-400">CarLog Raksakon Professional v2.0</div>
   </div>
 </section>
 
-<!-- MAIN -->
+<!-- ========== MAIN ========== -->
 <section id="mainPage" class="hidden-section">
 
-  <header class="app-header sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3 min-w-0">
-        <img src="https://i.postimg.cc/pXHW7T4D/Squre-profile-pink-bg.jpg" alt="โลโก้ CarLog Raksakon"
-          width="44" height="44" referrerpolicy="no-referrer"
-          class="w-10 h-10 sm:w-11 sm:h-11 shrink-0 rounded-2xl object-cover">
-        <div class="min-w-0">
-          <h1 class="font-bold text-slate-800 text-base">CarLog Raksakon</h1>
-          <p class="text-xs text-slate-500">ระบบบันทึกการใช้รถยนต์</p>
+  <header class="hero">
+    <div class="wrap">
+      <div class="bar">
+        <img src="https://i.postimg.cc/pXHW7T4D/Squre-profile-pink-bg.jpg" alt="" width="38" height="38" referrerpolicy="no-referrer" onerror="this.removeAttribute('src')">
+        <div class="who">
+          <b id="pageTitle">บันทึกการใช้รถ</b>
+          <small><span id="userNameDisplay"></span> · <span id="userIdDisplay"></span></small>
         </div>
+        <button class="round-btn" onclick="logout()" aria-label="ออกจากระบบ"><i class="ph ph-sign-out"></i></button>
       </div>
-
-      <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-        <div class="text-right min-w-0 max-w-[110px] sm:max-w-none">
-          <p id="userNameDisplay" class="font-semibold text-sm text-slate-700"></p>
-          <p id="userIdDisplay" class="text-xs text-slate-400"></p>
-        </div>
-        <button onclick="logout()" class="shrink-0 px-3 py-2 rounded-xl bg-slate-100 hover:bg-red-100 hover:text-red-600 text-slate-600 transition">
-          <i class="ph ph-sign-out text-lg"></i>
-        </button>
-      </div>
+      <nav class="tabs" id="bottomNav">
+        <button id="tabUsage" class="tab-button active" onclick="showTab('usage')"><i class="ph ph-car"></i><span>ใช้รถ</span></button>
+        <button id="tabFuel" class="tab-button fuel" onclick="showTab('fuel')"><i class="ph ph-gas-pump"></i><span>เติมน้ำมัน</span></button>
+        <button id="tabReport" class="tab-button" onclick="showTab('report')"><i class="ph ph-chart-bar"></i><span>รายงาน</span></button>
+      </nav>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto p-3 md:p-6">
+  <main class="sheet">
+    <div class="wrap">
+      <div class="handle"></div>
 
-    <!-- TABS (แถบล่างบนมือถือ) -->
-    <div id="bottomNav" class="flex gap-2 mb-6 overflow-x-auto">
-      <button id="tabUsage" onclick="showTab('usage')" class="tab-button active whitespace-nowrap px-5 py-3 rounded-xl font-semibold transition">
-        <i class="ph ph-car mr-2"></i>ใช้รถยนต์
-      </button>
-      <button id="tabFuel" onclick="showTab('fuel')" class="tab-button whitespace-nowrap px-5 py-3 rounded-xl font-semibold bg-white text-slate-600 transition">
-        <i class="ph ph-gas-pump mr-2"></i>เติมน้ำมัน
-      </button>
-      <button id="tabReport" onclick="showTab('report')" class="tab-button whitespace-nowrap px-5 py-3 rounded-xl font-semibold bg-white text-slate-600 transition">
-        <i class="ph ph-chart-bar mr-2"></i>รายงาน
-      </button>
+      <!-- ===== ใช้รถ ===== -->
+      <section id="usageSection">
+        <form id="usageForm" onsubmit="submitUsageForm(event)">
+          <div class="f lock">
+            <label>วันที่/เวลาใช้งาน · อัตโนมัติ</label>
+            <input id="usageDateTimeDisplay" class="in" type="text" readonly tabindex="-1">
+            <i class="ph ph-lock-simple f-ic"></i>
+            <input id="usageDate" type="hidden">
+          </div>
+
+          <div class="row c5">
+            <div class="f req">
+              <label for="usageCarId">รถยนต์</label>
+              <select id="usageCarId" class="in" onchange="loadUsageCarInfo()" required>
+                <option value="">-- เลือกรถยนต์ --</option>
+              </select>
+            </div>
+            <div class="f lock hl">
+              <label>เลขไมล์ครั้งก่อน</label>
+              <input id="usageLastMileage" class="in" type="text" readonly tabindex="-1" placeholder="-">
+            </div>
+          </div>
+
+          <div class="f req">
+            <label for="usagePurpose">การใช้งาน/สถานที่ไป</label>
+            <input id="usagePurpose" class="in" type="text" placeholder="เช่น ส่งผู้ป่วย รพ.สกลนคร" required>
+            <input id="usageStartMileage" type="hidden">
+          </div>
+
+          <div class="f req">
+            <label for="usageEndMileage">เลขไมล์สิ้นสุดเที่ยวนี้</label>
+            <input id="usageEndMileage" class="in" type="number" inputmode="numeric" min="0" step="1" placeholder="กรอกเลขไมล์เมื่อกลับถึง" required>
+          </div>
+
+          <label class="photo" id="usagePhotoBox">
+            <input id="usagePhoto" type="file" accept="image/*">
+            <i class="ph ph-camera"></i><span id="usagePhotoName">ถ่ายรูป / เลือกรูปภาพประกอบ</span>
+          </label>
+          <p class="hint">ไม่บังคับ · ระบบจะย่อรูปให้อัตโนมัติ</p>
+
+          <div class="f">
+            <label for="usageRemark">หมายเหตุ</label>
+            <textarea id="usageRemark" class="in" rows="2" placeholder="รายละเอียดเพิ่มเติม"></textarea>
+          </div>
+
+          <button id="usageSubmitButton" type="submit" class="btn"><i class="ph ph-floppy-disk"></i>บันทึกการใช้รถ</button>
+        </form>
+      </section>
+
+      <!-- ===== เติมน้ำมัน ===== -->
+      <section id="fuelSection" class="hidden-section">
+        <form id="fuelForm" onsubmit="submitFuelForm(event)">
+          <div class="row c6">
+            <div class="f lock">
+              <label>วันที่/เวลาเติม · อัตโนมัติ</label>
+              <input id="fuelDateTimeDisplay" class="in" type="text" readonly tabindex="-1">
+              <input id="fuelDate" type="hidden">
+            </div>
+            <div class="f req">
+              <label for="fuelCarId">รถยนต์</label>
+              <select id="fuelCarId" class="in" onchange="loadFuelCarInfo()" required>
+                <option value="">-- เลือกรถ --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row c2">
+            <div class="f lock hl co">
+              <label>เลขไมล์เติมครั้งก่อน</label>
+              <input id="fuelPrevMileage" class="in" type="text" readonly tabindex="-1" placeholder="-">
+            </div>
+            <div class="f req">
+              <label for="fuelCurrentMileage">เลขไมล์เติมครั้งนี้</label>
+              <input id="fuelCurrentMileage" class="in" type="number" inputmode="numeric" min="0" step="1" placeholder="กรอกเลขไมล์" required>
+            </div>
+          </div>
+
+          <div class="row c3">
+            <div class="f req">
+              <label for="fuelLiters">จำนวนลิตร</label>
+              <input id="fuelLiters" class="in" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" oninput="calculateFuelTotal()" required>
+            </div>
+            <div class="f req">
+              <label for="fuelPricePerLiter">ราคา/ลิตร</label>
+              <input id="fuelPricePerLiter" class="in" type="number" inputmode="decimal" min="0" step="0.01" value="35" oninput="calculateFuelTotal()" required>
+            </div>
+            <div class="f req">
+              <label for="fuelTotalCost">ยอดเงินรวม</label>
+              <input id="fuelTotalCost" class="in" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" required>
+            </div>
+          </div>
+
+          <label class="photo" id="fuelReceiptBox">
+            <input id="fuelReceipt" type="file" accept="image/*">
+            <i class="ph ph-camera"></i><span id="fuelReceiptName">ถ่ายรูปใบเสร็จ / เลือกรูป</span>
+          </label>
+          <p class="hint">ไม่บังคับ · ระบบจะย่อรูปให้อัตโนมัติ</p>
+
+          <div class="f">
+            <label for="fuelRemark">หมายเหตุ</label>
+            <textarea id="fuelRemark" class="in" rows="2" placeholder="รายละเอียดเพิ่มเติม"></textarea>
+          </div>
+
+          <button id="fuelSubmitButton" type="submit" class="btn coral"><i class="ph ph-floppy-disk"></i>บันทึกการเติมน้ำมัน</button>
+        </form>
+      </section>
+
+      <!-- ===== รายงาน ===== -->
+      <section id="reportSection" class="hidden-section">
+        <input id="reportType" type="hidden" value="usage">
+        <div class="seg">
+          <button id="segUsage" class="on" onclick="setReportType('usage')">การใช้รถ</button>
+          <button id="segFuel" class="fuel" onclick="setReportType('fuel')">เติมน้ำมัน</button>
+        </div>
+
+        <div class="chips">
+          <select id="reportCarId" class="chip car" onchange="loadReports()" aria-label="รถยนต์">
+            <option value="ALL">ทุกคัน</option>
+          </select>
+          <select id="reportMonth" class="chip mon" onchange="loadReports()" aria-label="เดือน">
+            <option value="ALL">ทุกเดือน</option>
+            <option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option>
+            <option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option>
+            <option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option>
+            <option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
+          </select>
+          <select id="reportYear" class="chip yr" onchange="loadReports()" aria-label="ปี"></select>
+          <button class="round-btn" onclick="loadReports()" aria-label="โหลดข้อมูลใหม่"><i class="ph ph-arrows-clockwise"></i></button>
+        </div>
+
+        <div class="card">
+          <div class="card-top"><span id="chartTitle">ระยะทาง (กม.)</span></div>
+          <div id="reportChart"><p class="empty">กำลังโหลด...</p></div>
+        </div>
+
+        <div class="stats" id="reportStats"></div>
+        <div class="list" id="reportList"></div>
+      </section>
+
     </div>
-
-    <!-- USAGE -->
-    <section id="usageSection">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-
-        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5">
-          <div class="flex items-center justify-between mb-5">
-            <div>
-              <h2 class="text-xl font-bold text-slate-800">บันทึกการใช้รถยนต์</h2>
-              <p class="text-sm text-slate-500">กรุณากรอกข้อมูลให้ครบถ้วน</p>
-            </div>
-            <i class="ph ph-car text-3xl text-blue-600"></i>
-          </div>
-
-          <form id="usageForm" onsubmit="submitUsageForm(event)">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="md:col-span-2">
-                <label class="block text-sm font-semibold mb-2">วันที่/เวลาใช้งาน <span class="text-xs font-normal text-slate-400"><i class="ph ph-lock-simple"></i> อัตโนมัติ</span></label>
-                <input id="usageDateTimeDisplay" type="text" readonly tabindex="-1"
-                  class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-slate-100 text-slate-700 font-semibold select-none">
-                <input id="usageDate" type="hidden">
-              </div>
-              <div class="md:col-span-2 grid grid-cols-5 gap-3">
-                <div class="col-span-3">
-                  <label class="required block text-sm font-semibold mb-2">รถยนต์</label>
-                  <select id="usageCarId" onchange="loadUsageCarInfo()" class="w-full px-4 py-3 rounded-xl border border-slate-300" required>
-                    <option value="">-- เลือกรถยนต์ --</option>
-                  </select>
-                </div>
-                <div class="col-span-2">
-                  <label class="block text-sm font-semibold mb-2">เลขไมล์ครั้งก่อน</label>
-                  <input id="usageLastMileage" type="text" readonly tabindex="-1" placeholder="-"
-                    class="w-full px-3 py-3 rounded-xl border border-slate-300 bg-slate-100 text-blue-700 font-bold select-none">
-                </div>
-              </div>
-              <div class="md:col-span-2">
-                <label class="required block text-sm font-semibold mb-2">การใช้งาน/สถานที่ไป</label>
-                <input id="usagePurpose" type="text" placeholder="เช่น ส่งผู้ป่วย รพ.สกลนคร / ส่งเอกสาร ไปสสจ."
-                  class="w-full px-4 py-3 rounded-xl border border-slate-300" required>
-                <input id="usageStartMileage" type="hidden">
-              </div>
-              <div class="md:col-span-2">
-                <label class="required block text-sm font-semibold mb-2">เลขไมล์สิ้นสุดเที่ยวนี้</label>
-                <input id="usageEndMileage" type="number" inputmode="numeric" min="0" step="1" placeholder="กรอกเลขไมล์เมื่อกลับถึง"
-                  class="w-full px-4 py-3 rounded-xl border border-slate-300" required>
-              </div>
-            </div>
-
-            <div class="mt-6">
-              <label class="block text-sm font-semibold mb-2">รูปภาพประกอบ</label>
-              <input id="usagePhoto" type="file" accept="image/*" class="w-full px-4 py-3 rounded-xl border border-slate-300">
-              <p class="text-xs text-slate-400 mt-1">ระบบจะย่อรูปให้อัตโนมัติ</p>
-            </div>
-
-            <div class="mt-4">
-              <label class="block text-sm font-semibold mb-2">หมายเหตุ</label>
-              <textarea id="usageRemark" rows="3" placeholder="รายละเอียดเพิ่มเติม" class="w-full px-4 py-3 rounded-xl border border-slate-300"></textarea>
-            </div>
-
-            <button id="usageSubmitButton" type="submit" class="w-full mt-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition">
-              <i class="ph ph-floppy-disk mr-2"></i>บันทึกการใช้รถ
-            </button>
-          </form>
-        </div>
-
-        <div class="hidden lg:block panel-navy text-white rounded-2xl shadow-lg p-6">
-          <i class="ph ph-info text-4xl opacity-80"></i>
-          <h3 class="text-xl font-bold mt-4">ขั้นตอนการบันทึก</h3>
-          <ol class="mt-5 space-y-4 text-sm text-blue-100">
-            <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">1</span>เลือกวันที่และรถยนต์</li>
-            <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">2</span>ตรวจสอบเลขไมล์ครั้งก่อน</li>
-            <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">3</span>กรอกการใช้งาน/สถานที่ไป</li>
-            <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">4</span>กรอกเลขไมล์สิ้นสุดเที่ยวนี้</li>
-            <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">5</span>กดบันทึกข้อมูล</li>
-          </ol>
-          <div class="mt-8 p-4 rounded-xl bg-white/10 text-sm">
-            <i class="ph ph-shield-check mr-1"></i>ระบบตรวจสอบเลขไมล์ล่าสุดจากฐานข้อมูลก่อนบันทึกทุกครั้ง
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FUEL -->
-    <section id="fuelSection" class="hidden-section">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-
-        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5">
-          <div class="flex items-center justify-between mb-5">
-            <div>
-              <h2 class="text-xl font-bold text-slate-800">บันทึกการเติมน้ำมัน</h2>
-              <p class="text-sm text-slate-500">ระบบจะใช้เลขไมล์ล่าสุดจากฐานข้อมูลอัตโนมัติ</p>
-            </div>
-            <i class="ph ph-gas-pump text-3xl text-pink-600"></i>
-          </div>
-
-          <form id="fuelForm" onsubmit="submitFuelForm(event)">
-            <div class="grid grid-cols-2 gap-3 md:gap-4">
-
-              <div class="col-span-2 grid grid-cols-5 md:grid-cols-2 gap-3 md:gap-4">
-                <div class="col-span-3 md:col-span-1">
-                  <label class="block text-sm font-semibold mb-2">วันที่/เวลาเติม <span class="text-xs font-normal text-slate-400"><i class="ph ph-lock-simple"></i> อัตโนมัติ</span></label>
-                  <input id="fuelDateTimeDisplay" type="text" readonly tabindex="-1"
-                    class="w-full px-3 py-3 rounded-xl border border-slate-300 bg-slate-100 text-slate-700 font-semibold select-none">
-                  <input id="fuelDate" type="hidden">
-                </div>
-                <div class="col-span-2 md:col-span-1">
-                  <label class="required block text-sm font-semibold mb-2">รถยนต์</label>
-                  <select id="fuelCarId" onchange="loadFuelCarInfo()" class="w-full px-3 py-3 rounded-xl border border-slate-300" required>
-                    <option value="">-- เลือกรถยนต์ --</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-semibold mb-2">เลขไมล์เติมครั้งก่อน</label>
-                <input id="fuelPrevMileage" type="number" inputmode="numeric" readonly tabindex="-1"
-                  class="w-full px-3 py-3 rounded-xl border border-slate-300 bg-slate-100 text-pink-700 font-bold select-none">
-              </div>
-              <div>
-                <label class="required block text-sm font-semibold mb-2">เลขไมล์เติมครั้งนี้</label>
-                <input id="fuelCurrentMileage" type="number" inputmode="numeric" min="0" step="1"
-                  class="w-full px-3 py-3 rounded-xl border border-slate-300" required>
-              </div>
-
-              <div class="col-span-2 grid grid-cols-3 gap-2 md:gap-4">
-                <div>
-                  <label class="required block text-sm font-semibold mb-2">จำนวนลิตร</label>
-                  <input id="fuelLiters" type="number" inputmode="decimal" min="0.01" step="0.01" oninput="calculateFuelTotal()"
-                    class="w-full px-2 md:px-4 py-3 rounded-xl border border-slate-300" required>
-                </div>
-                <div>
-                  <label class="required block text-sm font-semibold mb-2">ราคา/ลิตร</label>
-                  <input id="fuelPricePerLiter" type="number" inputmode="decimal" min="0" step="0.01" value="35" oninput="calculateFuelTotal()"
-                    class="w-full px-2 md:px-4 py-3 rounded-xl border border-slate-300" required>
-                </div>
-                <div>
-                  <label class="required block text-sm font-semibold mb-2">ยอดเงินรวม</label>
-                  <input id="fuelTotalCost" type="number" inputmode="decimal" min="0" step="0.01"
-                    class="w-full px-2 md:px-4 py-3 rounded-xl border border-slate-300" required>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="mt-6">
-              <label class="block text-sm font-semibold mb-2">รูปใบเสร็จ</label>
-              <input id="fuelReceipt" type="file" accept="image/*" class="w-full px-4 py-3 rounded-xl border border-slate-300">
-              <p class="text-xs text-slate-400 mt-1">ระบบจะย่อรูปให้อัตโนมัติ</p>
-            </div>
-
-            <div class="mt-4">
-              <label class="block text-sm font-semibold mb-2">หมายเหตุ</label>
-              <textarea id="fuelRemark" rows="3" placeholder="รายละเอียดเพิ่มเติม" class="w-full px-4 py-3 rounded-xl border border-slate-300"></textarea>
-            </div>
-
-            <button id="fuelSubmitButton" type="submit" class="w-full mt-6 py-3 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-bold transition">
-              <i class="ph ph-floppy-disk mr-2"></i>บันทึกการเติมน้ำมัน
-            </button>
-          </form>
-        </div>
-
-        <div class="hidden lg:block panel-coral text-white rounded-2xl shadow-lg p-6">
-          <i class="ph ph-gas-pump text-4xl opacity-80"></i>
-          <h3 class="text-xl font-bold mt-4">การตรวจสอบเลขไมล์</h3>
-          <p class="text-pink-100 text-sm mt-4 leading-7">
-            ระบบจะอ่านเลขไมล์ล่าสุดจากชีต Cars ณ เวลาที่กดบันทึกจริง เพื่อป้องกันการใช้ข้อมูลเลขไมล์เก่าจากหน้าเว็บ
-          </p>
-          <div class="mt-6 p-4 rounded-xl bg-white/10 text-sm">
-            <i class="ph ph-shield-check mr-1"></i>ป้องกันการบันทึกเลขไมล์ย้อนหลัง
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- REPORT -->
-    <section id="reportSection" class="hidden-section">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-5">
-
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
-          <div>
-            <h2 class="text-xl font-bold text-slate-800">รายงานการใช้รถและเติมน้ำมัน</h2>
-            <p class="text-sm text-slate-500">กรองข้อมูลตามรถยนต์ เดือน และปี</p>
-          </div>
-          <button onclick="loadReports()" class="px-4 py-2 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200">
-            <i class="ph ph-arrows-clockwise mr-1"></i>โหลดข้อมูลใหม่
-          </button>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-          <div class="col-span-2 md:col-span-1">
-            <label class="block text-sm font-semibold mb-2">รถยนต์</label>
-            <select id="reportCarId" onchange="loadReports()" class="w-full px-4 py-3 rounded-xl border border-slate-300">
-              <option value="ALL">รถยนต์ทั้งหมด</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-semibold mb-2">เดือน</label>
-            <select id="reportMonth" onchange="loadReports()" class="w-full px-4 py-3 rounded-xl border border-slate-300">
-              <option value="ALL">ทุกเดือน</option>
-              <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option><option value="3">มีนาคม</option>
-              <option value="4">เมษายน</option><option value="5">พฤษภาคม</option><option value="6">มิถุนายน</option>
-              <option value="7">กรกฎาคม</option><option value="8">สิงหาคม</option><option value="9">กันยายน</option>
-              <option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-semibold mb-2">ปี ค.ศ.</label>
-            <select id="reportYear" onchange="loadReports()" class="w-full px-4 py-3 rounded-xl border border-slate-300"></select>
-          </div>
-          <div class="col-span-2 md:col-span-1">
-            <label class="block text-sm font-semibold mb-2">ประเภทรายงาน</label>
-            <select id="reportType" onchange="switchReportType()" class="w-full px-4 py-3 rounded-xl border border-slate-300">
-              <option value="usage">การใช้รถ</option>
-              <option value="fuel">การเติมน้ำมัน</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-          <div class="p-3 md:p-4 rounded-xl bg-blue-50 border border-blue-100">
-            <p class="text-sm text-blue-600">จำนวนรายการ</p>
-            <p id="reportCount" class="text-xl md:text-2xl font-bold text-blue-800 break-words">0</p>
-          </div>
-          <div class="p-3 md:p-4 rounded-xl bg-emerald-50 border border-emerald-100">
-            <p class="text-sm text-emerald-600">ระยะทางรวม</p>
-            <p id="reportDistance" class="text-xl md:text-2xl font-bold text-emerald-800 break-words">0 กม.</p>
-          </div>
-          <div class="p-3 md:p-4 rounded-xl bg-pink-50 border border-pink-100">
-            <p class="text-sm text-pink-600">น้ำมันรวม</p>
-            <p id="reportLiters" class="text-xl md:text-2xl font-bold text-pink-800 break-words">0 ลิตร</p>
-          </div>
-          <div class="p-3 md:p-4 rounded-xl bg-amber-50 border border-amber-100">
-            <p class="text-sm text-amber-600">ค่าใช้จ่ายรวม</p>
-            <p id="reportCost" class="text-xl md:text-2xl font-bold text-amber-800 break-words">0 บาท</p>
-          </div>
-        </div>
-
-        <!-- USAGE REPORT: ตารางบนจอใหญ่ / การ์ดบนมือถือ -->
-        <div id="usageReportContainer" class="table-wrapper">
-          <table class="w-full text-sm">
-            <thead class="bg-slate-100">
-              <tr>
-                <th class="text-left p-3">วันที่/เวลา</th><th class="text-left p-3">รถยนต์</th><th class="text-left p-3">ผู้ใช้</th>
-                <th class="text-left p-3">การใช้งาน/สถานที่ไป</th>
-                <th class="text-right p-3">เริ่มต้น</th><th class="text-right p-3">สิ้นสุด</th>
-                <th class="text-right p-3">ระยะทาง</th><th class="text-center p-3">รูปภาพ</th>
-              </tr>
-            </thead>
-            <tbody id="usageReportBody">
-              <tr><td colspan="8" class="p-6 text-center text-slate-400">ยังไม่มีข้อมูล</td></tr>
-            </tbody>
-          </table>
-          <div id="usageReportCards" class="report-cards space-y-3"></div>
-        </div>
-
-        <!-- FUEL REPORT -->
-        <div id="fuelReportContainer" class="table-wrapper hidden-section">
-          <table class="w-full text-sm">
-            <thead class="bg-slate-100">
-              <tr>
-                <th class="text-left p-3">วันที่/เวลา</th><th class="text-left p-3">รถยนต์</th><th class="text-left p-3">ผู้บันทึก</th>
-                <th class="text-right p-3">ไมล์ก่อนเติม</th><th class="text-right p-3">ไมล์ปัจจุบัน</th>
-                <th class="text-right p-3">ระยะทาง</th><th class="text-right p-3">ลิตร</th>
-                <th class="text-right p-3">ราคา/ลิตร</th><th class="text-right p-3">รวมเงิน</th>
-                <th class="text-center p-3">ใบเสร็จ</th>
-              </tr>
-            </thead>
-            <tbody id="fuelReportBody">
-              <tr><td colspan="10" class="p-6 text-center text-slate-400">ยังไม่มีข้อมูล</td></tr>
-            </tbody>
-          </table>
-          <div id="fuelReportCards" class="report-cards space-y-3"></div>
-        </div>
-
-      </div>
-    </section>
-
   </main>
 </section>
 
 <script>
 /* ===== โหมดโฮสต์ภายนอก (GitHub Pages): เรียก Apps Script Web App ผ่าน fetch =====
    ใส่ URL ของ Web App (ลงท้ายด้วย /exec) ตรงนี้ */
-const API_URL = 'https://script.google.com/macros/s/AKfycbzRrq08ppUymBcj_wcw953IrpmIzgtJ32K8tnLn8lZScVFIGvL_3vgHK4JeWHOZN8wrbw/exec';
+const API_URL = 'วาง URL Web App ที่ลงท้ายด้วย /exec ที่นี่';
 
 (function () {
   window.google = window.google || {};
@@ -541,6 +401,10 @@ let isSavingFuel = false;
 let usageReports = [];
 let fuelReports = [];
 
+const PAGE_TITLES = { usage: 'บันทึกการใช้รถ', fuel: 'บันทึกการเติมน้ำมัน', report: 'รายงาน' };
+const PHOTO_TEXT = { usagePhoto: 'ถ่ายรูป / เลือกรูปภาพประกอบ', fuelReceipt: 'ถ่ายรูปใบเสร็จ / เลือกรูป' };
+const MONTHS_SHORT = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
 /* ---------- HELPERS ---------- */
 function $(id) { return document.getElementById(id); }
 
@@ -549,16 +413,15 @@ function todayISO() {
   return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
 }
 
-/* วันที่/เวลาใช้งาน: อัปเดตอัตโนมัติ (ค่าจริงที่บันทึกถูกกำหนดที่ Server) */
+/* วันที่/เวลา: อัปเดตอัตโนมัติ (ค่าจริงที่บันทึกถูกกำหนดที่ Server) */
 function updateClocks() {
   const d = new Date();
   const p = n => String(n).padStart(2, '0');
+  const date = `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`;
   $('usageDate').value = todayISO();
-  $('usageDateTimeDisplay').value =
-    `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())} น.`;
+  $('usageDateTimeDisplay').value = `${date} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())} น.`;
   $('fuelDate').value = todayISO();
-  $('fuelDateTimeDisplay').value =
-    `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())} น.`;
+  $('fuelDateTimeDisplay').value = `${date} ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
 function formatNumber(value, decimals = 0) {
@@ -574,7 +437,7 @@ function showLoading(buttonId, loadingText) {
   const b = $(buttonId);
   if (!b) return;
   b.dataset.originalText = b.innerHTML;
-  b.innerHTML = `<i class="ph ph-spinner-gap animate-spin mr-2"></i>${loadingText}`;
+  b.innerHTML = `<i class="ph ph-spinner-gap animate-spin"></i>${loadingText}`;
   b.disabled = true;
   b.classList.add('loading');
 }
@@ -622,11 +485,28 @@ function readFileAsBase64(file) {
   });
 }
 
+/* ปุ่มรูปภาพ: แสดงชื่อไฟล์ที่เลือก */
+function bindPhoto(inputId, nameId, boxId) {
+  $(inputId).addEventListener('change', () => {
+    const f = $(inputId).files[0];
+    $(nameId).textContent = f ? `เลือกแล้ว: ${f.name}` : PHOTO_TEXT[inputId];
+    $(boxId).classList.toggle('has', !!f);
+  });
+}
+
+function resetPhoto(inputId, nameId, boxId) {
+  $(inputId).value = '';
+  $(nameId).textContent = PHOTO_TEXT[inputId];
+  $(boxId).classList.remove('has');
+}
+
 /* ---------- INIT ---------- */
 window.addEventListener('load', () => {
   updateClocks();
   setInterval(updateClocks, 1000);
   initializeYearOptions();
+  bindPhoto('usagePhoto', 'usagePhotoName', 'usagePhotoBox');
+  bindPhoto('fuelReceipt', 'fuelReceiptName', 'fuelReceiptBox');
 
   const savedUser = localStorage.getItem('carlog_current_user');
   if (savedUser) {
@@ -645,20 +525,16 @@ function initializeYearOptions() {
   sel.innerHTML = `<option value="ALL">ทุกปี</option>
     <option value="${y}">${y}</option><option value="${y - 1}">${y - 1}</option><option value="${y - 2}">${y - 2}</option>`;
   sel.value = y;
+  $('reportMonth').value = String(new Date().getMonth() + 1);
 }
 
-/* ---------- MOBILE KEYBOARD ---------- */
+/* ---------- MOBILE KEYBOARD: เลื่อนช่องที่แตะมากลางจอ ---------- */
 document.addEventListener('focusin', e => {
   if (!e.target.matches('input, select, textarea') || e.target.readOnly) return;
-  document.body.classList.add('kb-open');
-  if (e.target.type !== 'file') {
+  if (e.target.type !== 'file' && !e.target.classList.contains('chip')) {
     setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300);
   }
 });
-document.addEventListener('focusout', () => setTimeout(() => {
-  const a = document.activeElement;
-  if (!a || !a.matches('input, select, textarea')) document.body.classList.remove('kb-open');
-}, 100));
 
 /* ---------- ตรวจว่ามือถือถูกแสดงแบบ Desktop ---------- */
 window.addEventListener('load', () => {
@@ -735,7 +611,7 @@ function showMainPage() {
   $('loginPage').classList.add('hidden-section');
   $('mainPage').classList.remove('hidden-section');
   $('userNameDisplay').textContent = currentUser.name || '-';
-  $('userIdDisplay').textContent = `${currentUser.empId || ''} • ${currentUser.role || 'User'}`;
+  $('userIdDisplay').textContent = currentUser.empId || '';
   loadCarLists();
 }
 
@@ -749,6 +625,7 @@ function showTab(tab) {
     buttons[key].classList.toggle('active', key === tab);
   });
 
+  $('pageTitle').textContent = PAGE_TITLES[tab];
   window.scrollTo(0, 0);
   if (tab === 'report') loadReports();
 }
@@ -762,8 +639,9 @@ function loadCarLists() {
         opts += `<option value="${escapeHtml(car.carId)}">${escapeHtml(`${car.carId} - ${car.carName}`)}</option>`;
       });
       $('usageCarId').innerHTML = '<option value="">-- เลือกรถยนต์ --</option>' + opts;
-      $('fuelCarId').innerHTML = '<option value="">-- เลือกรถยนต์ --</option>' + opts;
-      $('reportCarId').innerHTML = '<option value="ALL">รถยนต์ทั้งหมด</option>' + opts;
+      $('fuelCarId').innerHTML = '<option value="">-- เลือกรถ --</option>' + opts;
+      $('reportCarId').innerHTML = '<option value="ALL">ทุกคัน</option>' +
+        cars.map(c => `<option value="${escapeHtml(c.carId)}">${escapeHtml(c.carId)}</option>`).join('');
     })
     .withFailureHandler(showError)
     .getCarList();
@@ -781,7 +659,7 @@ function loadUsageCarInfo() {
     .withSuccessHandler(car => {
       usageCarInfo = car;
       $('usageStartMileage').value = car.lastMileage;
-      $('usageLastMileage').value = `${formatNumber(car.lastMileage)} กม.`;
+      $('usageLastMileage').value = formatNumber(car.lastMileage);
     })
     .withFailureHandler(showError)
     .getCarInfo(carId);
@@ -798,7 +676,7 @@ async function submitUsageForm(event) {
   const startMileage = Number($('usageStartMileage').value);
   const endMileage = Number($('usageEndMileage').value);
 
-  if (!Number.isFinite(startMileage)) { showError(new Error('ไม่พบเลขไมล์ครั้งก่อน กรุณาเลือกรถใหม่')); return; }
+  if ($('usageStartMileage').value === '' || !Number.isFinite(startMileage)) { showError(new Error('ไม่พบเลขไมล์ครั้งก่อน กรุณาเลือกรถใหม่')); return; }
   if (!Number.isFinite(endMileage)) { showError(new Error('กรุณากรอกเลขไมล์สิ้นสุดเที่ยวนี้')); return; }
   if (endMileage < startMileage) { showError(new Error('เลขไมล์สิ้นสุดเที่ยวนี้ต้องไม่น้อยกว่าเลขไมล์ครั้งก่อน')); return; }
 
@@ -829,6 +707,7 @@ async function submitUsageForm(event) {
 
         $('usageForm').reset();
         $('usageStartMileage').value = '';
+        resetPhoto('usagePhoto', 'usagePhotoName', 'usagePhotoBox');
         updateClocks();
         usageCarInfo = null;
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -858,7 +737,7 @@ function loadFuelCarInfo() {
   google.script.run
     .withSuccessHandler(car => {
       fuelCarInfo = car;
-      $('fuelPrevMileage').value = car.lastMileage;
+      $('fuelPrevMileage').value = formatNumber(car.lastMileage);
     })
     .withFailureHandler(showError)
     .getCarInfo(carId);
@@ -884,7 +763,7 @@ async function submitFuelForm(event) {
   const totalCost = Number($('fuelTotalCost').value);
 
   if (!Number.isFinite(currentMileage)) { showError(new Error('กรุณากรอกเลขไมล์เติมครั้งนี้')); return; }
-  if (currentMileage < Number($('fuelPrevMileage').value || 0)) { showError(new Error('เลขไมล์เติมครั้งนี้ต้องไม่น้อยกว่าเลขไมล์เติมครั้งก่อน')); return; }
+  if (fuelCarInfo && currentMileage < Number(fuelCarInfo.lastMileage || 0)) { showError(new Error('เลขไมล์เติมครั้งนี้ต้องไม่น้อยกว่าเลขไมล์เติมครั้งก่อน')); return; }
   if (!Number.isFinite(liters) || liters <= 0) { showError(new Error('กรุณากรอกจำนวนลิตรให้ถูกต้อง')); return; }
   if (!Number.isFinite(pricePerLiter) || pricePerLiter < 0) { showError(new Error('กรุณากรอกราคาน้ำมันต่อลิตรให้ถูกต้อง')); return; }
   if (!Number.isFinite(totalCost) || totalCost < 0) { showError(new Error('กรุณากรอกยอดเงินรวมให้ถูกต้อง')); return; }
@@ -901,7 +780,7 @@ async function submitFuelForm(event) {
       fuelDate: $('fuelDate').value,
       carId: carId,
       /* prevMileage จะถูกตรวจสอบและคำนวณใหม่ที่ Server */
-      prevMileage: $('fuelPrevMileage').value,
+      prevMileage: fuelCarInfo ? fuelCarInfo.lastMileage : '',
       currentMileage: currentMileage,
       liters: liters,
       pricePerLiter: pricePerLiter,
@@ -918,6 +797,7 @@ async function submitFuelForm(event) {
         await showSuccess(`${result.message}\nเลขไมล์ล่าสุด ${formatNumber(result.lastMileage)} กม.`);
 
         $('fuelForm').reset();
+        resetPhoto('fuelReceipt', 'fuelReceiptName', 'fuelReceiptBox');
         updateClocks();
         $('fuelPricePerLiter').value = 35;
         fuelCarInfo = null;
@@ -939,18 +819,23 @@ async function submitFuelForm(event) {
 }
 
 /* ---------- REPORTS ---------- */
-function switchReportType() {
-  const type = $('reportType').value;
-  $('usageReportContainer').classList.toggle('hidden-section', type !== 'usage');
-  $('fuelReportContainer').classList.toggle('hidden-section', type !== 'fuel');
+function setReportType(type) {
+  $('reportType').value = type;
+  $('segUsage').classList.toggle('on', type === 'usage');
+  $('segFuel').classList.toggle('on', type === 'fuel');
   loadReports();
 }
+
+/* คงชื่อเดิมไว้เผื่อมีโค้ดอื่นเรียกใช้ */
+function switchReportType() { setReportType($('reportType').value); }
 
 function loadReports() {
   const carId = $('reportCarId').value || 'ALL';
   const month = $('reportMonth').value || 'ALL';
   const year = $('reportYear').value || 'ALL';
   const type = $('reportType').value;
+
+  $('reportList').innerHTML = '<p class="empty">กำลังโหลด...</p>';
 
   if (type === 'usage') {
     google.script.run
@@ -965,117 +850,140 @@ function loadReports() {
   }
 }
 
-const EMPTY_CARD = '<div class="p-6 text-center text-slate-400 bg-white rounded-xl border border-slate-200">ไม่พบข้อมูลตามเงื่อนไข</div>';
+/* แปลง dd/MM/yyyy จาก Server */
+function parseDMY(s) {
+  const p = String(s || '').split('/');
+  if (p.length !== 3) return null;
+  return { day: Number(p[0]), month: Number(p[1]), year: Number(p[2]) };
+}
 
-function imageLink(url, color) {
-  return url
-    ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener" class="${color} flex items-center gap-1"><i class="ph ph-image text-xl"></i></a>`
-    : '-';
+/* รวมยอดรายวัน (เมื่อเลือกเดือน) หรือรายเดือน (เมื่อเลือกทุกเดือน) */
+function bucketize(rows, dateKey, valueFn) {
+  const m = $('reportMonth').value;
+  const yv = $('reportYear').value;
+  let labels, pick;
+
+  if (m !== 'ALL') {
+    const y = yv === 'ALL' ? new Date().getFullYear() : Number(yv);
+    const n = new Date(y, Number(m), 0).getDate();
+    labels = Array.from({ length: n }, (_, i) => String(i + 1));
+    pick = d => d.day - 1;
+  } else {
+    labels = MONTHS_SHORT.slice();
+    pick = d => d.month - 1;
+  }
+
+  const vals = labels.map(() => 0);
+  rows.forEach(r => {
+    const d = parseDMY(r[dateKey]);
+    if (!d) return;
+    const i = pick(d);
+    if (i >= 0 && i < vals.length) vals[i] += valueFn(r);
+  });
+  return { labels, vals, per: m !== 'ALL' ? 'รายวัน' : 'รายเดือน' };
+}
+
+function axisHtml(labels) {
+  const mid = labels[Math.floor((labels.length - 1) / 2)];
+  return `<div class="axis"><span>${labels[0]}</span><span>${mid}</span><span>${labels[labels.length - 1]}</span></div>`;
+}
+
+function renderBars(b, unit) {
+  const max = Math.max(...b.vals);
+  if (max <= 0) return '<p class="empty">ยังไม่มีข้อมูลในช่วงนี้</p>';
+  const bars = b.vals.map((v, i) => {
+    const h = v > 0 ? Math.max(v / max * 100, 4) : 2;
+    return `<i class="${v === max ? 'on' : ''}" style="height:${h}%" title="${b.labels[i]}: ${formatNumber(v)} ${unit}"></i>`;
+  }).join('');
+  return `<div class="bars">${bars}</div>${axisHtml(b.labels)}`;
+}
+
+function renderLine(b, fmt) {
+  const max = Math.max(...b.vals);
+  if (max <= 0) return '<p class="empty">ยังไม่มีข้อมูลในช่วงนี้</p>';
+
+  const W = 300, H = 130, n = b.vals.length;
+  const pts = b.vals.map((v, i) => ({ x: n > 1 ? i / (n - 1) * W : W / 2, y: H - 8 - v / max * (H - 34) }));
+  let d = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+  for (let i = 1; i < n; i++) {
+    const p0 = pts[i - 1], p1 = pts[i], mx = ((p0.x + p1.x) / 2).toFixed(1);
+    d += ` C${mx},${p0.y.toFixed(1)} ${mx},${p1.y.toFixed(1)} ${p1.x.toFixed(1)},${p1.y.toFixed(1)}`;
+  }
+  const iMax = b.vals.indexOf(max);
+  const left = pts[iMax].x / W * 100, top = pts[iMax].y / H * 100;
+  const tipLeft = Math.min(Math.max(left, 14), 86);
+
+  return `<div class="line">
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FE696E" stop-opacity=".28"/><stop offset="1" stop-color="#FE696E" stop-opacity="0"/>
+        </linearGradient></defs>
+        <path d="${d} L${W},${H} L0,${H} Z" fill="url(#lg)"/>
+        <path d="${d}" fill="none" stroke="#FE696E" stroke-width="2.5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      </svg>
+      <span class="dot" style="left:${left}%;top:${top}%"></span>
+      <span class="tip" style="left:${tipLeft}%;top:${top}%">${b.labels[iMax]}: ${fmt(max)}</span>
+    </div>${axisHtml(b.labels)}`;
+}
+
+function photoLink(url) {
+  return url ? ` · <a href="${escapeHtml(url)}" target="_blank" rel="noopener"><i class="ph ph-image"></i> ดูรูป</a>` : '';
 }
 
 function renderUsageReports() {
-  const body = $('usageReportBody');
-  const cards = $('usageReportCards');
   let totalDistance = 0;
   usageReports.forEach(r => { totalDistance += Number(r.distance || 0); });
 
-  $('reportCount').textContent = formatNumber(usageReports.length);
-  $('reportDistance').textContent = `${formatNumber(totalDistance)} กม.`;
-  $('reportLiters').textContent = '0 ลิตร';
-  $('reportCost').textContent = '0 บาท';
+  const b = bucketize(usageReports, 'usageDate', r => Number(r.distance || 0));
+  $('chartTitle').textContent = `ระยะทาง${b.per} (กม.)`;
+  $('reportChart').innerHTML = renderBars(b, 'กม.');
 
-  if (!usageReports.length) {
-    body.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">ไม่พบข้อมูลตามเงื่อนไข</td></tr>`;
-    cards.innerHTML = EMPTY_CARD;
-    return;
-  }
+  $('reportStats').innerHTML = `
+    <div><small>ระยะทางรวม</small><b>${formatNumber(totalDistance)} กม.</b></div>
+    <div><small>จำนวนเที่ยว</small><b>${formatNumber(usageReports.length)}</b></div>`;
 
-  body.innerHTML = usageReports.map(r => `
-    <tr class="border-b border-slate-100 hover:bg-slate-50">
-      <td class="p-3">${escapeHtml(r.timestamp || r.usageDate)}</td>
-      <td class="p-3"><div class="font-semibold">${escapeHtml(r.carId)}</div><div class="text-xs text-slate-400">${escapeHtml(r.carName)}</div></td>
-      <td class="p-3"><div>${escapeHtml(r.empName)}</div><div class="text-xs text-slate-400">${escapeHtml(r.empId)}</div></td>
-      <td class="p-3">${escapeHtml(r.purpose)}</td>
-      <td class="p-3 text-right">${formatNumber(r.startMileage)}</td>
-      <td class="p-3 text-right">${formatNumber(r.endMileage)}</td>
-      <td class="p-3 text-right font-bold text-blue-700">${formatNumber(r.distance)}</td>
-      <td class="p-3 text-center">${imageLink(r.photoUrl, 'text-blue-600 hover:text-blue-800 justify-center')}</td>
-    </tr>`).join('');
-
-  cards.innerHTML = usageReports.map(r => `
-    <div class="bg-white rounded-xl border border-slate-200 p-3">
-      <div class="flex justify-between gap-2">
-        <div class="min-w-0">
-          <p class="font-bold text-slate-800">${escapeHtml(r.carId)} <span class="font-normal text-xs text-slate-500">${escapeHtml(r.carName)}</span></p>
-          <p class="text-xs text-slate-400">${escapeHtml(r.timestamp || r.usageDate)} • ${escapeHtml(r.empName)}</p>
-        </div>
-        <div class="text-right shrink-0">
-          <p class="text-lg font-bold text-blue-700">${formatNumber(r.distance)}</p>
-          <p class="text-xs text-slate-400">กม.</p>
-        </div>
+  $('reportList').innerHTML = usageReports.length ? usageReports.map(r => `
+    <div class="li">
+      <div class="ic"><i class="ph ph-car"></i></div>
+      <div class="tx">
+        <b>${escapeHtml(r.carId)} · ${escapeHtml(r.purpose || '-')}</b>
+        <small>${escapeHtml(r.timestamp || r.usageDate)} · ${escapeHtml(r.empName)}</small>
+        <small>ไมล์ ${formatNumber(r.startMileage)} → ${formatNumber(r.endMileage)}${photoLink(r.photoUrl)}</small>
       </div>
-      <p class="mt-2 text-sm text-slate-600"><i class="ph ph-clipboard-text"></i> ${escapeHtml(r.purpose)}</p>
-      <div class="mt-2 flex justify-between items-center text-xs text-slate-500">
-        <span>ไมล์ ${formatNumber(r.startMileage)} → ${formatNumber(r.endMileage)}</span>
-        ${r.photoUrl ? imageLink(r.photoUrl, 'text-blue-600') : ''}
-      </div>
-    </div>`).join('');
+      <div class="v">${formatNumber(r.distance)}<small> กม.</small></div>
+    </div>`).join('') : '<p class="empty">ไม่พบรายการตามเงื่อนไข</p>';
 }
 
 function renderFuelReports() {
-  const body = $('fuelReportBody');
-  const cards = $('fuelReportCards');
   let totalDistance = 0, totalLiters = 0, totalCost = 0;
-
   fuelReports.forEach(r => {
     totalDistance += Number(r.distanceSinceLastFuel || 0);
     totalLiters += Number(r.liters || 0);
     totalCost += Number(r.totalCost || 0);
   });
 
-  $('reportCount').textContent = formatNumber(fuelReports.length);
-  $('reportDistance').textContent = `${formatNumber(totalDistance)} กม.`;
-  $('reportLiters').textContent = `${formatNumber(totalLiters, 2)} ลิตร`;
-  $('reportCost').textContent = `${formatNumber(totalCost, 2)} บาท`;
+  const b = bucketize(fuelReports, 'fuelDate', r => Number(r.totalCost || 0));
+  let acc = 0;
+  b.vals = b.vals.map(v => (acc += v));   // ยอดสะสม เส้นกราฟจะเรียบและอ่านง่าย
+  $('chartTitle').textContent = `ค่าน้ำมันสะสม${b.per} (บาท)`;
+  $('reportChart').innerHTML = renderLine(b, v => `${formatNumber(v)} บ.`);
 
-  if (!fuelReports.length) {
-    body.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-400">ไม่พบข้อมูลตามเงื่อนไข</td></tr>`;
-    cards.innerHTML = EMPTY_CARD;
-    return;
-  }
+  $('reportStats').innerHTML = `
+    <div><small>ค่าน้ำมันรวม</small><b class="co">${formatNumber(totalCost, 2)} บาท</b></div>
+    <div><small>น้ำมันรวม</small><b>${formatNumber(totalLiters, 2)} ลิตร</b></div>
+    <div><small>จำนวนครั้งที่เติม</small><b>${formatNumber(fuelReports.length)}</b></div>
+    <div><small>ระยะทางระหว่างเติม</small><b>${formatNumber(totalDistance)} กม.</b></div>`;
 
-  body.innerHTML = fuelReports.map(r => `
-    <tr class="border-b border-slate-100 hover:bg-slate-50">
-      <td class="p-3">${escapeHtml(r.timestamp || r.fuelDate)}</td>
-      <td class="p-3"><div class="font-semibold">${escapeHtml(r.carId)}</div><div class="text-xs text-slate-400">${escapeHtml(r.carName)}</div></td>
-      <td class="p-3"><div>${escapeHtml(r.empName)}</div><div class="text-xs text-slate-400">${escapeHtml(r.empId)}</div></td>
-      <td class="p-3 text-right">${formatNumber(r.prevMileage)}</td>
-      <td class="p-3 text-right">${formatNumber(r.currentMileage)}</td>
-      <td class="p-3 text-right">${formatNumber(r.distanceSinceLastFuel)}</td>
-      <td class="p-3 text-right">${formatNumber(r.liters, 2)}</td>
-      <td class="p-3 text-right">${formatNumber(r.pricePerLiter, 2)}</td>
-      <td class="p-3 text-right font-bold text-pink-700">${formatNumber(r.totalCost, 2)}</td>
-      <td class="p-3 text-center">${imageLink(r.receiptUrl, 'text-pink-600 hover:text-pink-800 justify-center')}</td>
-    </tr>`).join('');
-
-  cards.innerHTML = fuelReports.map(r => `
-    <div class="bg-white rounded-xl border border-slate-200 p-3">
-      <div class="flex justify-between gap-2">
-        <div class="min-w-0">
-          <p class="font-bold text-slate-800">${escapeHtml(r.carId)} <span class="font-normal text-xs text-slate-500">${escapeHtml(r.carName)}</span></p>
-          <p class="text-xs text-slate-400">${escapeHtml(r.timestamp || r.fuelDate)} • ${escapeHtml(r.empName)}</p>
-        </div>
-        <div class="text-right shrink-0">
-          <p class="text-lg font-bold text-pink-700">${formatNumber(r.totalCost, 2)}</p>
-          <p class="text-xs text-slate-400">บาท</p>
-        </div>
+  $('reportList').innerHTML = fuelReports.length ? fuelReports.map(r => `
+    <div class="li">
+      <div class="ic co"><i class="ph ph-gas-pump"></i></div>
+      <div class="tx">
+        <b>${escapeHtml(r.carId)} · ${formatNumber(r.liters, 2)} ล. × ${formatNumber(r.pricePerLiter, 2)}</b>
+        <small>${escapeHtml(r.timestamp || r.fuelDate)} · ${escapeHtml(r.empName)}</small>
+        <small>ไมล์ ${formatNumber(r.prevMileage)} → ${formatNumber(r.currentMileage)} (${formatNumber(r.distanceSinceLastFuel)} กม.)${photoLink(r.receiptUrl)}</small>
       </div>
-      <p class="mt-2 text-sm text-slate-600">${formatNumber(r.liters, 2)} ลิตร × ${formatNumber(r.pricePerLiter, 2)} บาท</p>
-      <div class="mt-2 flex justify-between items-center text-xs text-slate-500">
-        <span>ไมล์ ${formatNumber(r.prevMileage)} → ${formatNumber(r.currentMileage)} (${formatNumber(r.distanceSinceLastFuel)} กม.)</span>
-        ${r.receiptUrl ? imageLink(r.receiptUrl, 'text-pink-600') : ''}
-      </div>
-    </div>`).join('');
+      <div class="v co">${formatNumber(r.totalCost, 2)}<small> บ.</small></div>
+    </div>`).join('') : '<p class="empty">ไม่พบรายการตามเงื่อนไข</p>';
 }
 </script>
 
